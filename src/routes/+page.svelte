@@ -5,11 +5,9 @@
 	import type { IStackViewport, IViewport, IVolumeViewport } from '@cornerstonejs/core/types';
 	import { onMount } from 'svelte';
 
-	// Cornerstone has references to document/window/etc so we have to wait to import
-	// until mounted
-	let viewer = import('$lib/components/CornerstoneViewer.svelte');
 	let imageIds = $state<string[]>([]);
 	let volumeId = 'streamingImageVolume';
+	let viewportId = 'viewport-1';
 
 	onMount(async () => {
 		imageIds = await createImageIdsAndCacheMetaData({
@@ -20,34 +18,31 @@
 	});
 
 	async function loadImages(viewport: IViewport | IVolumeViewport | IStackViewport) {
-		let volume = await volumeLoader.createAndCacheVolume(volumeId, {
+		const vp = <IVolumeViewport>viewport;
+		const volumeLoaderOpts = {
 			imageIds
-		});
+		};
+		const volume = await volumeLoader.createAndCacheVolume(volumeId, volumeLoaderOpts);
 		volume.load();
-		(viewport as IVolumeViewport).setVolumes([{ volumeId }]);
-		viewport.render();
+		vp.setVolumes([{ volumeId }]);
+		vp.render();
 	}
 </script>
 
 <div class="mx-auto h-screen w-full space-y-2">
-	<div class="w-full text-center text-4xl font-bold">
+	<div class="text-center text-4xl font-bold">
 		<h1>Cornerstone3D x SvelteKit Demo</h1>
 	</div>
-	<div
-		class="mx-auto h-80 w-80 sm:h-96 sm:w-96 md:h-[32rem] md:w-[32rem] lg:h-[40rem] lg:w-[40rem]"
-	>
-		<p class="text-xl font-medium">Volume Viewport</p>
-		{#await viewer then { default: Viewer }}
-			<Viewer
-				class="h-full w-full"
-				imageId="test"
-				viewportId="viewport-1"
-				viewportType={ViewportType.ORTHOGRAPHIC}
-				opts={{
-					orientation: OrientationAxis.AXIAL
-				}}
-				onReady={loadImages}
-			/>
-		{/await}
-	</div>
+	<!-- Cornerstone has references to document/window/etc so we have to wait to import until mounted -->
+	{#await import('$lib/components/CornerstoneViewer.svelte') then { default: Viewer }}
+		<Viewer
+			class="mx-auto h-80 h-full w-80 w-full sm:h-96 sm:w-96 md:h-[32rem] md:w-[32rem] lg:h-[40rem] lg:w-[40rem]"
+			{viewportId}
+			viewportType={ViewportType.ORTHOGRAPHIC}
+			opts={{
+				orientation: OrientationAxis.AXIAL
+			}}
+			onReady={loadImages}
+		/>
+	{/await}
 </div>
