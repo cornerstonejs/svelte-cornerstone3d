@@ -17,6 +17,7 @@
 	const volumeId = 'streamingImageVolume';
 	const viewportId = 'viewport-1';
 	const toolGroupId = 'tool-group-1';
+	const engineId = 'my-rendering-engine';
 
 	function loadImages(viewport: IViewport | IVolumeViewport | IStackViewport) {
 		createImageIdsAndCacheMetaData({
@@ -76,7 +77,7 @@
 	<div class="text-center text-4xl font-bold">
 		<h1>Cornerstone3D x SvelteKit Demo</h1>
 	</div>
-	<CornerstoneContext onReady={registerTools}>
+	<CornerstoneContext {engineId} onReady={registerTools}>
 		{#snippet children(engine)}
 			<CornerstoneViewer
 				class="mx-auto h-80 w-80 sm:h-96 sm:w-96 md:h-[32rem] md:w-[32rem] lg:h-[40rem] lg:w-[40rem]"

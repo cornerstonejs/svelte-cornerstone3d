@@ -1,15 +1,21 @@
 <script lang="ts">
 	import { init as initTools } from '@cornerstonejs/tools';
-	import { init as initCore, isCornerstoneInitialized, RenderingEngine } from '@cornerstonejs/core';
+	import {
+		getRenderingEngine,
+		init as initCore,
+		isCornerstoneInitialized,
+		RenderingEngine
+	} from '@cornerstonejs/core';
 	import { init as initDicomLoader } from '@cornerstonejs/dicom-image-loader';
 	import { untrack, type Snippet } from 'svelte';
 
 	type CornerstoneContextProps = {
+		engineId?: string;
 		children: Snippet<[RenderingEngine]>;
 		onReady?: () => () => void;
 	};
 
-	let { children, onReady }: CornerstoneContextProps = $props();
+	let { engineId, children, onReady }: CornerstoneContextProps = $props();
 
 	let engine = $state<RenderingEngine>();
 
@@ -22,7 +28,8 @@
 			initDicomLoader({ maxWebWorkers: 2 });
 		}
 		if (!untrack(() => engine)) {
-			engine = new RenderingEngine('rendering_engine_0');
+			let existingEngine = getRenderingEngine(engineId ?? 'rendering_engine_0');
+			engine = existingEngine ?? new RenderingEngine(engineId ?? 'rendering_engine_0');
 		}
 		let destroyFn = onReady?.();
 		return () => {
